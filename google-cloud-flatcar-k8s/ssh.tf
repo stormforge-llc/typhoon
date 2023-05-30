@@ -39,7 +39,7 @@ resource "null_resource" "bootstrap" {
   depends_on = [
     null_resource.copy-controller-secrets,
     module.workers,
-    google_dns_record_set.apiserver,
+    dnsimple_zone_record.apiservers,
   ]
 
   connection {

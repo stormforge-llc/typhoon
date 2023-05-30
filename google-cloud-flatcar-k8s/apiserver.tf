@@ -1,15 +1,10 @@
 # TCP Proxy load balancer DNS record
-resource "google_dns_record_set" "apiserver" {
-  # DNS Zone name where record should be created
-  managed_zone = var.dns_zone_name
-
-  # DNS record
-  name = format("%s.%s.", var.cluster_name, var.dns_zone)
+resource "dnsimple_zone_record" "apiservers" {
+  zone_name = var.dns_zone
+  name = var.cluster_name
   type = "A"
   ttl  = 300
-
-  # IPv4 address of apiserver TCP Proxy load balancer
-  rrdatas = [google_compute_global_address.apiserver-ipv4.address]
+  value = google_compute_global_address.apiserver-ipv4.address
 }
 
 # Static IPv4 address for the TCP Proxy Load Balancer

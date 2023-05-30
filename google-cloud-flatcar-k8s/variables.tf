@@ -10,14 +10,20 @@ variable "region" {
   description = "Google Cloud Region (e.g. us-central1, see `gcloud compute regions list`)"
 }
 
+# DNSimple
+
 variable "dns_zone" {
   type        = string
-  description = "Google Cloud DNS Zone (e.g. google-cloud.example.com)"
+  description = "DNSimple DNS Zone (e.g. google-cloud.example.com)"
 }
 
-variable "dns_zone_name" {
-  type        = string
-  description = "Google Cloud DNS Zone name (e.g. example-zone)"
+variable "dnsimple_account_id" {
+  type = string
+}
+
+variable "dnsimple_token" {
+  type = string
+  sensitive = true
 }
 
 # instances
