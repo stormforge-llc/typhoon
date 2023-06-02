@@ -1,63 +1,13 @@
-# Managed instance group of workers
-resource "google_compute_region_instance_group_manager" "workers" {
-  name        = "${var.name}-worker"
-  description = "Compute instance group of ${var.name} workers"
-
-  # instance name prefix for instances in the group
-  base_instance_name = "${var.name}-worker"
-  region             = var.region
-  version {
-    name              = "default"
-    instance_template = google_compute_instance_template.worker.self_link
-  }
-
-  # Roll out MIG instance template changes by replacing instances.
-  # - Surge to create new instances, then delete old instances.
-  # - Replace ensures new Ignition is picked up
-  update_policy {
-    type                  = "PROACTIVE"
-    max_surge_fixed       = 3
-    max_unavailable_fixed = 0
-    minimal_action        = "REPLACE"
-  }
-
-  target_size  = var.worker_count
-  target_pools = [google_compute_target_pool.workers.self_link]
-
-  named_port {
-    name = "http"
-    port = "80"
-  }
-
-  named_port {
-    name = "https"
-    port = "443"
-  }
-
-  auto_healing_policies {
-    health_check      = google_compute_health_check.worker.id
-    initial_delay_sec = 300
-  }
+data "google_compute_zones" "all" {
+  region = var.region
 }
 
-# Health check for worker node
-resource "google_compute_health_check" "worker" {
-  name        = "${var.name}-worker-health"
-  description = "Health check for worker node"
+locals {
+  zones = data.google_compute_zones.all.names
 
-  timeout_sec        = 20
-  check_interval_sec = 30
-
-  healthy_threshold   = 1
-  unhealthy_threshold = 6
-
-  http_health_check {
-    port         = "10256"
-    request_path = "/healthz"
-  }
+  workers_ipv4_public = google_compute_instance_from_template.workers.*.network_interface.0.access_config.0.nat_ip
 }
 
-# Worker instance template
 resource "google_compute_instance_template" "worker" {
   name_prefix  = "${var.name}-worker-"
   description  = "${var.name} worker instance template"
@@ -103,6 +53,15 @@ resource "google_compute_instance_template" "worker" {
     # To update an Instance Template, Terraform should replace the existing resource
     create_before_destroy = true
   }
+}
+
+resource "google_compute_instance_from_template" "workers" {
+  count = var.worker_count
+
+  name = "${var.cluster_name}-worker-${count.index}"
+  # use a zone in the region and wrap around (e.g. controllers > zones)
+  zone         = element(local.zones, count.index)
+  source_instance_template = google_compute_instance_template.worker.self_link
 }
 
 # Fedora CoreOS worker
