@@ -15,6 +15,6 @@ module "bootstrap" {
   daemonset_tolerations = var.daemonset_tolerations
 
   // temporary
-  external_apiserver_port = 443
+  external_apiserver_port = 6443
 }
 
