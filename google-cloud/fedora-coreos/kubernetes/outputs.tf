@@ -2,6 +2,20 @@ output "kubeconfig-admin" {
   value     = module.bootstrap.kubeconfig-admin
   sensitive = true
 }
+output "kubeconfig-admin-ca-cert" {
+  value = module.bootstrap.kubeconfig-admin-ca-cert
+}
+output "kubeconfig-admin-kubelet-cert" {
+  value = module.bootstrap.kubeconfig-admin-kubelet-cert
+  sensitive = true
+}
+output "kubeconfig-admin-kubelet-key" {
+  value = module.bootstrap.kubeconfig-admin-kubelet-key
+  sensitive = true
+}
+output "kubeconfig-admin-server" {
+  value = module.bootstrap.kubeconfig-admin-server
+}
 
 # Outputs for worker pools
 
